@@ -1,0 +1,72 @@
+
+#include <stdio.h>
+
+#define MAX 100
+#define INF 999999
+
+void dijkstra(int G[MAX][MAX], int n, int startnode) {
+    int distance[MAX], pred[MAX];
+    int visited[MAX];
+    int count, mindistance, nextnode, i, j;
+
+    // Initialize distance, predecessor, and visited arrays
+    for (i = 1; i <= n; i++) {
+        distance[i] = G[startnode][i];
+        pred[i] = startnode;
+        visited[i] = 0;
+    }
+
+    distance[startnode] = 0;
+    visited[startnode] = 1;
+    count = 1;
+
+    while (count < n) {
+        mindistance = INF;
+
+        // Find the unvisited node with the minimum distance
+        for (i = 1; i <= n; i++) {
+            if (distance[i] < mindistance && !visited[i]) {
+                mindistance = distance[i];
+                nextnode = i;
+            }
+        }
+
+        // If the remaining unvisited nodes are unreachable, stop processing
+        if (mindistance == INF) {
+            break;
+        }
+
+        // Check if a better path exists through the selected nextnode
+        visited[nextnode] = 1;
+        for (i = 1; i <= n; i++) {
+            if (!visited[i]) {
+                if (mindistance + G[nextnode][i] < distance[i]) {
+                    distance[i] = mindistance + G[nextnode][i];
+                    pred[i] = nextnode;
+                }
+            }
+        }
+        count++;
+    }
+
+    // Print the heading exactly as specified
+    printf("Node\tDistance\tPath\n");
+    for (i = 1; i <= n; i++) {
+        if (i != startnode) {
+            // Apply width padding formatting to align columns exactly with test cases
+            printf("   %d\t", i);
+            if (distance[i] == INF) {
+                printf("     %s\t%s\n", "INF", "NO PATH");
+            } else {
+                printf("       %d\t", distance[i]);
+                
+                // Backtrack to output the exact destination-to-source sequence string
+                printf("%d", i);
+                j = i;
+                do {
+                    j = pred[j];
+                    printf("<-%d", j);
+                } while (j != startnode);
+                printf("\n");
+            }
+}
