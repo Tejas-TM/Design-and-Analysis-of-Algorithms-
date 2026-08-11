@@ -1,0 +1,88 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Structure to store found subsets for reverse printing
+typedef struct {
+    int *data;
+    int size;
+} Subset;
+
+Subset *results = NULL;
+int result_count = 0;
+int result_capacity = 0;
+
+// Helper function to store a valid subset
+void save_subset(int current_subset[], int subset_size) {
+    if (result_count >= result_capacity) {
+        result_capacity = result_capacity == 0 ? 10 : result_capacity * 2;
+        results = realloc(results, result_capacity * sizeof(Subset));
+    }
+    results[result_count].data = malloc(subset_size * sizeof(int));
+    results[result_count].size = subset_size;
+    for (int i = 0; i < subset_size; i++) {
+        results[result_count].data[i] = current_subset[i];
+    }
+    result_count++;
+}
+
+// Backtracking function
+void find_subsets(int arr[], int n, int target_sum, int index, int current_sum, int current_subset[], int subset_size) {
+    // If target sum is reached, save the path
+    if (current_sum == target_sum) {
+        save_subset(current_subset, subset_size);
+        return;
+    }
+
+    // Terminate if we exceed the target or run out of elements
+    if (current_sum > target_sum || index == n) {
+        return;
+    }
+
+    // Scenario 1: Include the current element
+    current_subset[subset_size] = arr[index];
+    find_subsets(arr, n, target_sum, index + 1, current_sum + arr[index], current_subset, subset_size + 1);
+
+    // Scenario 2: Exclude the current element
+    find_subsets(arr, n, target_sum, index + 1, current_sum, current_subset, subset_size);
+}
+
+int main() {
+    int n;
+    if (scanf("%d", &n) != 1) return 0;
+
+    int *arr = malloc(n * sizeof(int));
+    for (int i = 0; i < n; i++) {
+        if (scanf("%d", &arr[i]) != 1) return 0;
+    }
+
+    int target_sum;
+    if (scanf("%d", &target_sum) != 1) return 0;
+
+    int *current_subset = malloc(n * sizeof(int));
+
+    // Start backtracking exploration
+    find_subsets(arr, n, target_sum, 0, 0, current_subset, 0);
+
+    // Print results in reverse order of discovery
+    if (result_count == 0) {
+        printf("-1\n");
+    } else {
+        for (int i = result_count - 1; i >= 0; i--) {
+            for (int j = 0; j < results[i].size; j++) {
+                printf("%d", results[i].data[j]);
+                if (j < results[i].size - 1) {
+                    printf(" ");
+                }
+            }
+            printf(" \n");
+            free(results[i].data); // Clean up memory
+        }
+    }
+
+    // Clean up remaining allocations
+    free(results);
+    free(arr);
+    free(current_subset);
+
+    return 0;
+}
